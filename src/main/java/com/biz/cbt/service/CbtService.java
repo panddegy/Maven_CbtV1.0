@@ -27,24 +27,38 @@ public class CbtService {
 	public void cbtStart() {
 		//TODO cbtStart
 		while(true) {
-			System.out.println("===================================================================");
-			System.out.println("                  정보처리 기사 실기문제 CBT v1.0");
-			System.out.println("===================================================================");
-			System.out.println(">>1.문제풀기 2.문제보기 3.문제입력 4.문제수정 5.문제삭제 0.CBT종료");
-			System.out.println("-------------------------------------------------------------------");
+			System.out.println("=============================================");
+			System.out.println("       정보처리 기사 실기문제 CBT v1.0");
+			System.out.println("=============================================");
+			System.out.println(">> 1.풀기   2.관리   3.보기   0.CBT종료");
+			System.out.println("---------------------------------------------");
 			int intMenu=checkMenu();
 			if(intMenu==0) {
 				System.out.println(">> CBT를 종료합니다.");
 				break;
 			}
 			if(intMenu==1) startQuestion();
-			if(intMenu==2) selectQuestion();
-			if(intMenu==3) insertCbt();
-			if(intMenu==4) updateQuestion();
-			if(intMenu==5) deleteQuestion();
+			if(intMenu==2) managementCbt();
+			if(intMenu==3) selectQuestion();
 		}
 	}
 	
+	public void managementCbt() {
+		// TODO managementCbt
+		while(true) {
+			System.out.println("=============================================");
+			System.out.println("       정보처리 기사 실기문제 CBT v1.0");
+			System.out.println("=============================================");
+			System.out.println(">> 1.입력   2.수정   3.삭제   0.돌아가기");
+			System.out.println("---------------------------------------------");
+			int intMenu=checkMenu();
+			if(intMenu==0) break;
+			if(intMenu==1) insertCbt();
+			if(intMenu==2) updateQuestion();
+			if(intMenu==3) deleteQuestion();
+		}
+	}
+
 	public void deleteQuestion() {
 		//TODO deleteQuestion
 		System.out.println(">> 삭제할 문제의 ID를 입력하세요.");
@@ -64,8 +78,7 @@ public class CbtService {
 				} else {
 					System.out.println(">> 삭제가 실패하였습니다.");
 				}
-			}
-			else {
+			} else {
 				System.out.println(">> 삭제가 취소되었습니다.");
 			}
 		} catch (NumberFormatException e) {
@@ -78,11 +91,11 @@ public class CbtService {
 	public void selectQuestion() {
 		//TODO selectQuestion
 		List<CbtVO> cbtList=dbService.selectAllCbt();
-		System.out.println("-------------------------------------------------------------------");
+		System.out.println("---------------------------------------------");
 		for(CbtVO v:cbtList) {
 			viewCbtVO(v);
 		}
-		System.out.println("-------------------------------------------------------------------");
+		System.out.println("---------------------------------------------");
 	}
 
 	public CbtVO insertQuestion() {
@@ -91,17 +104,11 @@ public class CbtService {
 		System.out.print(">> ");
 		String strQuestion=sc.nextLine();
 		String strExample="";
-		for(int i=0; i<3; i++) {
-			System.out.println();
+		for(int i=0; i<4; i++) {
 			System.out.println(">> "+(i+1)+"번 보기를 입력하세요.");
 			System.out.print(">> ");
 			strExample+=sc.nextLine()+"/";
 		}
-		System.out.println();
-		System.out.println(">> 4번 보기를 입력하세요. ");
-		System.out.print(">> ");
-		strExample+=sc.nextLine();
-		System.out.println();
 		System.out.println(">> 정답의 번호를 입력하세요.");
 		System.out.print(">> ");
 		String strAnswer=sc.nextLine();
@@ -130,8 +137,7 @@ public class CbtService {
 			} else {
 				System.out.println(">> 전송이 실패하였습니다.");
 			}
-		}
-		else {
+		} else {
 			System.out.println(">> 전송이 취소되었습니다.");
 		}
 	}
@@ -147,6 +153,7 @@ public class CbtService {
 			CbtVO v=dbService.findByIDCbt(longID);
 			viewCbtVO(v);
 			CbtVO vo=insertQuestion();
+			if(vo==null) return;
 			vo.setCb_id(v.getCb_id());
 			System.out.println();
 			System.out.println(">> 전송 하시겠습니까?(y/n)");
@@ -158,8 +165,7 @@ public class CbtService {
 				} else {
 					System.out.println(">> 전송이 실패하였습니다.");
 				}
-			}
-			else {
+			} else {
 				System.out.println(">> 전송이 취소되었습니다.");
 			}
 		} catch (NumberFormatException e) {
@@ -186,7 +192,8 @@ public class CbtService {
 		int questionIndex=1;
 		for(int i=0; i<20; i++) {
 			int answerIndex=1;
-			System.out.println((questionIndex)+". "+cbtList.get(i).getCb_question());
+			System.out.println((questionIndex)+". ");
+			lineChange(cbtList.get(i));
 			System.out.println();
 			String[] examples=cbtList.get(i).getCb_example().split("/");
 			Collections.shuffle(Arrays.asList(examples));
@@ -199,7 +206,7 @@ public class CbtService {
 				t_sheet+="1";
 				sheet+="1";
 				totalScore+=5;
-			}else {
+			} else {
 				t_sheet+="0";
 				sheet+="0";
 			}
@@ -221,6 +228,20 @@ public class CbtService {
 		dbService.insertResult(vo);
 	}
 	
+	public void lineChange(CbtVO vo) {
+		//TODO lineChange
+		String[] questions=vo.getCb_question().split("");
+		for(int i=0; i<questions.length; i++) {
+			System.out.print(questions[i]);
+			if((i!=0)&&(i%18==0)) {
+				System.out.println();
+				System.out.print("          ");
+			}
+		}
+		System.out.println();
+		System.out.println();
+	}
+
 	public void viewResult(String sheet) {
 		//TODO viewResult
 		int totalScore=0;
@@ -235,8 +256,7 @@ public class CbtService {
 			if(s.equals("1")) {
 				System.out.print("O ");
 				totalScore+=5;
-			}
-			else System.out.print("X ");
+			} else System.out.print("X ");
 		}
 		System.out.println();
 		System.out.println("점수>> "+totalScore);
@@ -372,7 +392,7 @@ public class CbtService {
 			String strMenu=sc.nextLine();
 			try {
 				int intMenu=Integer.valueOf(strMenu);
-				if(intMenu>5 || intMenu<0) {
+				if(intMenu>3 || intMenu<0) {
 					System.out.println(">> 입력이 잘못되었습니다.");
 					continue;
 				}
@@ -392,37 +412,14 @@ public class CbtService {
 		}
 		String[] examples=vo.getCb_example().split("/");
 		System.out.println(">> ID   : "+vo.getCb_id());
-		System.out.println(">> 문제 : "+vo.getCb_question());
+		System.out.print(">> 문제 : ");
+		lineChange(vo);
 		for(String s:examples) {
 			System.out.println(">> 보기 : "+s);
 		}
+		System.out.println();
 		System.out.println(">> 정답 : "+vo.getCb_answer());
 		System.out.println();
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
