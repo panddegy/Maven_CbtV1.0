@@ -58,36 +58,7 @@ public class CbtService {
 			if(intMenu==3) deleteQuestion();
 		}
 	}
-
-	public void deleteQuestion() {
-		//TODO deleteQuestion
-		System.out.println(">> 삭제할 문제의 ID를 입력하세요.");
-		System.out.print(">> ");
-		String strID=sc.nextLine();
-		System.out.println();
-		try {
-			long longID=Long.valueOf(strID);
-			CbtVO vo=dbService.findByIDCbt(longID);
-			viewCbtVO(vo);
-			System.out.println(">> 해당문제를 삭제하시겠습니까?(y/n)");
-			System.out.print(">> ");
-			String strYN=sc.nextLine();
-			if(strYN.equalsIgnoreCase("y")) {
-				if(dbService.deleteCbt(longID)>0) {
-					System.out.println(">> 삭제가 완료되었습니다.");
-				} else {
-					System.out.println(">> 삭제가 실패하였습니다.");
-				}
-			} else {
-				System.out.println(">> 삭제가 취소되었습니다.");
-			}
-		} catch (NumberFormatException e) {
-			System.out.println(">> 입력이 잘못되었습니다.");
-			return;
-		}
-		
-	}
-
+	
 	public void selectQuestion() {
 		//TODO selectQuestion
 		List<CbtVO> cbtList=dbService.selectAllCbt();
@@ -96,31 +67,6 @@ public class CbtService {
 			viewCbtVO(v);
 		}
 		System.out.println("---------------------------------------------");
-	}
-
-	public CbtVO insertQuestion() {
-		
-		System.out.println(">> 문제 지문을 입력하세요.");
-		System.out.print(">> ");
-		String strQuestion=sc.nextLine();
-		String strExample="";
-		for(int i=0; i<4; i++) {
-			System.out.println(">> "+(i+1)+"번 보기를 입력하세요.");
-			System.out.print(">> ");
-			strExample+=sc.nextLine()+"/";
-		}
-		System.out.println(">> 정답의 번호를 입력하세요.");
-		System.out.print(">> ");
-		String strAnswer=sc.nextLine();
-		try {
-			String[] strExamples=strExample.split("/");
-			strAnswer=strExamples[(Integer.valueOf(strAnswer))-1];
-			CbtVO vo=new CbtVO(strQuestion, strExample, strAnswer);
-			return vo;
-		} catch (Exception e) {
-			System.out.println(">> 입력이 잘못되었습니다.");
-			return null;			
-		}
 	}
 	
 	public void insertCbt() {
@@ -174,6 +120,60 @@ public class CbtService {
 		}
 	}
 
+	public CbtVO insertQuestion() {
+		
+		System.out.println(">> 문제 지문을 입력하세요.");
+		System.out.print(">> ");
+		String strQuestion=sc.nextLine();
+		String strExample="";
+		for(int i=0; i<4; i++) {
+			System.out.println(">> "+(i+1)+"번 보기를 입력하세요.");
+			System.out.print(">> ");
+			strExample+=sc.nextLine()+"/";
+		}
+		System.out.println(">> 정답의 번호를 입력하세요.");
+		System.out.print(">> ");
+		String strAnswer=sc.nextLine();
+		try {
+			String[] strExamples=strExample.split("/");
+			strAnswer=strExamples[(Integer.valueOf(strAnswer))-1];
+			CbtVO vo=new CbtVO(strQuestion, strExample, strAnswer);
+			return vo;
+		} catch (Exception e) {
+			System.out.println(">> 입력이 잘못되었습니다.");
+			return null;			
+		}
+	}
+
+	public void deleteQuestion() {
+		//TODO deleteQuestion
+		System.out.println(">> 삭제할 문제의 ID를 입력하세요.");
+		System.out.print(">> ");
+		String strID=sc.nextLine();
+		System.out.println();
+		try {
+			long longID=Long.valueOf(strID);
+			CbtVO vo=dbService.findByIDCbt(longID);
+			viewCbtVO(vo);
+			System.out.println(">> 해당문제를 삭제하시겠습니까?(y/n)");
+			System.out.print(">> ");
+			String strYN=sc.nextLine();
+			if(strYN.equalsIgnoreCase("y")) {
+				if(dbService.deleteCbt(longID)>0) {
+					System.out.println(">> 삭제가 완료되었습니다.");
+				} else {
+					System.out.println(">> 삭제가 실패하였습니다.");
+				}
+			} else {
+				System.out.println(">> 삭제가 취소되었습니다.");
+			}
+		} catch (NumberFormatException e) {
+			System.out.println(">> 입력이 잘못되었습니다.");
+			return;
+		}
+		
+	}
+
 	public void startQuestion() {
 		//TODO startQuestion
 		System.out.println(">> ID를 입력하세요");
@@ -190,9 +190,11 @@ public class CbtService {
 		int viewNum=0;
 		int totalScore=0;
 		int questionIndex=1;
-		for(int i=0; i<20; i++) {
+		int size=20;
+		if(size>cbtList.size()) size=cbtList.size();
+		for(int i=0; i<size; i++) {
 			int answerIndex=1;
-			System.out.println((questionIndex)+". ");
+			System.out.print((questionIndex)+". ");
 			lineChange(cbtList.get(i));
 			System.out.println();
 			String[] examples=cbtList.get(i).getCb_example().split("/");
@@ -228,20 +230,61 @@ public class CbtService {
 		dbService.insertResult(vo);
 	}
 	
+	public int answer(String[] examples, String cb_answer) {
+		//TODO answer
+		int i=0;
+		while(true) {
+			System.out.println();
+			System.out.print("정답(-1:종료)>> ");
+			String answer=sc.nextLine();
+			int intAnswer=Integer.valueOf(answer);
+			if(intAnswer<0) return -1;
+			if(examples[intAnswer-1].equals(cb_answer)) {
+				System.out.println();
+				System.out.println(">> 정답입니다.");
+				return 1;
+			} else {
+				System.out.println();
+				System.out.println(">> 오답입니다. ");
+				if(i==1) return 0;
+				System.out.println(">> 다시 풀기 : 1  넘어가기 : Enter ");
+				System.out.print(">> ");
+				String strRe=sc.nextLine();
+				if(strRe.equals("1")) i=1;
+				else return 0;
+			}
+		}
+	}
+	
 	public void lineChange(CbtVO vo) {
 		//TODO lineChange
 		String[] questions=vo.getCb_question().split("");
 		for(int i=0; i<questions.length; i++) {
 			System.out.print(questions[i]);
-			if((i!=0)&&(i%18==0)) {
+			if((i!=0)&&(i%25==0)) {
 				System.out.println();
-				System.out.print("          ");
+				System.out.print("   ");
 			}
 		}
 		System.out.println();
-		System.out.println();
 	}
 
+	public void viewMidScore(String t_sheet, int viewNum) {
+		// TODO viewMidScore
+		String[] t_sheets=t_sheet.split("");
+		System.out.print("문항>> ");
+		for(int i=0; i<5; i++) {
+			System.out.print((i+1+viewNum)+" ");
+		}
+		System.out.println();
+		System.out.print("답안>> ");
+		for(String s:t_sheets) {
+			if(s.equals("1")) System.out.print("O ");
+			else System.out.print("X ");
+		}
+		System.out.println();
+	}
+	
 	public void viewResult(String sheet) {
 		//TODO viewResult
 		int totalScore=0;
@@ -260,22 +303,6 @@ public class CbtService {
 		}
 		System.out.println();
 		System.out.println("점수>> "+totalScore);
-		System.out.println();
-	}
-
-	public void viewMidScore(String t_sheet, int viewNum) {
-		// TODO viewMidScore
-		String[] t_sheets=t_sheet.split("");
-		System.out.print("문항>> ");
-		for(int i=0; i<5; i++) {
-			System.out.print((i+1+viewNum)+" ");
-		}
-		System.out.println();
-		System.out.print("답안>> ");
-		for(String s:t_sheets) {
-			if(s.equals("1")) System.out.print("O ");
-			else System.out.print("X ");
-		}
 		System.out.println();
 	}
 
@@ -325,66 +352,6 @@ public class CbtService {
 		return cbtList;
 	}
 	
-	public int answer(String[] examples, String cb_answer) {
-		//TODO answer
-		int i=0;
-		while(true) {
-			System.out.println();
-			System.out.print("정답(-1:종료)>> ");
-			String answer=sc.nextLine();
-			int intAnswer=Integer.valueOf(answer);
-			if(intAnswer<0) return -1;
-			if(examples[intAnswer-1].equals(cb_answer)) {
-				System.out.println();
-				System.out.println(">> 정답입니다.");
-				return 1;
-			} else {
-				System.out.println();
-				System.out.println(">> 오답입니다. ");
-				if(i==1) return 0;
-				System.out.println(">> 다시 한번 생각해 보세요.");
-				i=1;
-			}
-		}
-	}
-	
-	public void insertBulk() {
-		//TODO insertBulk
-		String file="src/main/java/com/biz/cbt/question2.txt";
-		
-		FileReader fr;
-		BufferedReader buffer;
-		
-		List<CbtVO> insertList=new ArrayList();
-		
-		try {
-			fr=new FileReader(file);
-			buffer=new BufferedReader(fr);
-			while(true) {
-				String reader=buffer.readLine();
-				if(reader==null) break;
-				String[] cbts=reader.split(":");
-				CbtVO vo=new CbtVO();
-				vo.setCb_question(cbts[0]);
-				vo.setCb_example(cbts[1]);
-				vo.setCb_answer(cbts[2]);
-				insertList.add(vo);
-			}
-			buffer.close();
-			fr.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		for(CbtVO v:insertList) {
-			dbService.insertCbt(v);
-		}
-	}
-	
 	public int checkMenu() {
 		//TODO checkMenu
 		while(true) {
@@ -420,6 +387,43 @@ public class CbtService {
 		System.out.println();
 		System.out.println(">> 정답 : "+vo.getCb_answer());
 		System.out.println();
+	}
+	
+	public void insertBulk() {
+		//TODO insertBulk
+		String file="src/main/java/com/biz/cbt/question.txt";
+		
+		FileReader fr;
+		BufferedReader buffer;
+		
+		List<CbtVO> insertList=new ArrayList();
+		
+		try {
+			fr=new FileReader(file);
+			buffer=new BufferedReader(fr);
+			while(true) {
+				String reader=buffer.readLine();
+				if(reader==null) break;
+				String[] cbts=reader.split(":");
+				CbtVO vo=new CbtVO();
+				vo.setCb_question(cbts[0]);
+				vo.setCb_example(cbts[1]);
+				vo.setCb_answer(cbts[2]);
+				insertList.add(vo);
+			}
+			buffer.close();
+			fr.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(CbtVO v:insertList) {
+			dbService.insertCbt(v);
+		}
 	}
 }
 

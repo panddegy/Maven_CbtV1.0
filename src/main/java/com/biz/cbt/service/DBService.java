@@ -118,7 +118,12 @@ public class DBService {
 		SqlSession session=this.sqlSessionFactory.openSession();
 		ResultDao rDao=session.getMapper(ResultDao.class);
 		
-		int ret=rDao.insert(vo);
+		int ret;
+		try {
+			ret = rDao.insert(vo);
+		} catch (Exception e) {
+			ret = rDao.update(vo);
+		}
 		session.commit();
 		session.close();
 		return ret;
