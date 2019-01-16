@@ -40,6 +40,8 @@ public class CbtService {
 			if(intMenu==1) startQuestion();
 			if(intMenu==2) managementCbt();
 			if(intMenu==3) selectQuestion();
+			
+			
 		}
 	}
 	
@@ -56,6 +58,7 @@ public class CbtService {
 			if(intMenu==1) insertCbt();
 			if(intMenu==2) updateQuestion();
 			if(intMenu==3) deleteQuestion();
+			
 		}
 	}
 	
@@ -237,6 +240,7 @@ public class CbtService {
 			System.out.println();
 			System.out.print("정답(-1:종료)>> ");
 			String answer=sc.nextLine();
+			if(answer.equals("")) continue;
 			int intAnswer=Integer.valueOf(answer);
 			if(intAnswer<0) return -1;
 			if(examples[intAnswer-1].equals(cb_answer)) {
@@ -344,6 +348,8 @@ public class CbtService {
 				if(cb_id.equals(re_qid[j])&&re_answer[j].equals("1")) {
 					cbtList.remove(i);
 					size--;
+					i--;
+					break;
 				}
 			}
 			i++;
